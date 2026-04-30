@@ -3,7 +3,7 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import OperationalError
-from time import time
+import time
 import os
 
 DB_HOST = os.getenv('DB_HOST', 'localhost')

@@ -23,7 +23,7 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
-    print(f"{request.method} {request.url.path} completed in {process_time:.4f}s")
+    logging.info(f"{request.method} {request.url.path} completed in {process_time:.4f}s")
     return response
 
 @app.get("/")
@@ -53,9 +53,9 @@ def list_webhooks(db: Session = Depends(get_db)):
     cache_key = "webhooks:user:1"  # TEMP: we don’t have auth yet
     cached_webhooks = get_cache(cache_key)
     if cached_webhooks:
-        print("CACHE HIT")
+        logging.info("CACHE HIT")
         return cached_webhooks
-    print ("CACHE MISS")
+    logging.info("CACHE MISS")
 
     webhooks = crud_webhook.get_webhooks(db)
     serialized = [
