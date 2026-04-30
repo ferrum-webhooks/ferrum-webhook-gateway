@@ -7,7 +7,6 @@ import logging
 
 from app import schemas
 from app.deps import get_db
-from app.security import hash_password
 from app.cache import get_cache, set_cache, delete_cache, push_event
 
 from app.crud import user as crud_user

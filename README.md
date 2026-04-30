@@ -16,27 +16,14 @@ This service acts as the **ingress layer** of the system and is designed to be f
 
 ## Architecture Context
 
-Ferrum currently consists of two services:
-
-### 1. Gateway (`webhook-gateway`) ← *this repo*
-
-* Accepts API requests
-* Stores users, webhooks, and events
-* Pushes events to queue
-
-### 2. Worker (`webhook-worker`)
-
-* Consumes events from queue
-* Delivers webhooks
-* Tracks delivery outcomes
-
----
-
-## System Flow
-
-```text
+```
 Client → Gateway → PostgreSQL → Redis Queue → Worker → Webhook Endpoint
 ```
+
+This service:
+- Writes events to DB
+- Pushes `event_id` to Redis queue
+- does not process events
 
 ---
 
@@ -79,6 +66,7 @@ webhook-gateway/
       webhook.py
       event.py
   requirements.txt
+  Dockerfile
   README.md
 ```
 
@@ -104,7 +92,6 @@ webhook-gateway/
 ## Setup Instructions
 
 ---
-
 ### 1. Clone repository
 
 ```bash
@@ -114,46 +101,23 @@ cd webhook-gateway
 
 ---
 
-### 2. Create virtual environment
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
----
-
-### 3. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-### 4. Configure environment
-
-Ensure:
-
-* PostgreSQL is running
-* Redis is running on:
-
+### 2. Environment Configuration
 ```text
-localhost:6379
+DB_HOST 
+DB_PORT 
+DB_USER 
+DB_PASSWORD 
+DB_NAME 
+REDIS_HOST 
+REDIS_PORT
 ```
 
 ---
 
-### 5. Run server
-
+### 3. Run in Docker
 ```bash
-uvicorn app.main:app --reload
-```
-
-Server will start at:
-
-```text
-http://127.0.0.1:8000
+docker build -t ferrum-gateway .
+docker run -p 8000:8000 ferrum-gateway
 ```
 
 ---
@@ -326,7 +290,7 @@ Logs include:
 
 ### Password Hashing
 
-* SHA256 pre-hash + bcrypt
+* SHA256 pre-hash + argon2
 * Stored as `password_hash`
 
 ---

@@ -1,7 +1,7 @@
 # file: app/schemas.py
 
-from pydantic import BaseModel, EmailStr
-from typing import Optional, Dict, Any
+from pydantic import BaseModel, EmailStr, AnyHttpUrl
+from typing import Dict, Any
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -15,12 +15,12 @@ class UserOut(BaseModel):
         from_attributes = True
 
 class WebhookCreate(BaseModel):
-    url: str
+    url: AnyHttpUrl
     event_type: str
 
 class WebhookOut(BaseModel):
     id: int
-    url: str
+    url: AnyHttpUrl
     event_type: str
 
     class Config:
