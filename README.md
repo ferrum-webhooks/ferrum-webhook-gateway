@@ -421,24 +421,3 @@ Logs include:
 
 ---
 
-## Summary
-
-The gateway has evolved from:
-
-```text
-Simple CRUD API
-```
-
-to:
-
-```text
-High-throughput event ingestion layer
-```
-
-It now serves as the **entry point of a distributed, asynchronous system**, optimized for:
-
-* low latency
-* scalability
-* decoupled processing
-
----
