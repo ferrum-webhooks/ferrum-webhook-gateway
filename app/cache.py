@@ -73,3 +73,10 @@ def push_event(queue_name : str, data : dict):
             "push_event_error",
             extra={"service": "gateway", "queue_name": queue_name, "error": str(e)}
         )
+
+def get_queue_length(queue_name : str):
+    try:
+        length = redis_client.llen(queue_name)
+        return length
+    except Exception:
+        return -1;

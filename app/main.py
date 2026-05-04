@@ -8,12 +8,13 @@ import uuid
 
 from app import schemas
 from app.deps import get_db
-from app.cache import get_cache, set_cache, delete_cache, push_event
+from app.cache import get_cache, set_cache, delete_cache, push_event, get_queue_length
 
 from app.crud import user as crud_user
 from app.crud import webhook as crud_webhook
 from app.crud import event as crud_event
 from app.logging_config import setup_logging
+from app.metrics import record_request, get_metrics
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -37,9 +38,16 @@ async def log_requests(request: Request, call_next):
                "latency": round(process_time,4),
             }
     )
+    record_request(process_time)
     response.headers["X-Process-Time"] = str(process_time)
     response.headers["X-Request-ID"] = request_id
     return response
+
+@app.get("/metrics")
+def metrics():
+    data = get_metrics()
+    data["queue_length"] = get_queue_length("event_queue")
+    return data
 
 @app.get("/")
 def root():
