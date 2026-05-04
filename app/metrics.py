@@ -1,21 +1,11 @@
-import time
-from collections import defaultdict
+from prometheus_client import Counter, Histogram
 
-metrics = {
-    "request_count": 0,
-    "request_latency": [],
-}
+REQUEST_COUNT = Counter(
+    'gateway_requests_total',
+    'Total number of API requests'
+)
 
-def record_request(latency: float):
-    metrics["request_count"] += 1
-    metrics["request_latency"].append(latency)
-
-
-def get_metrics():
-    latencies = metrics["request_latency"]
-    avg_latency = sum(latencies) / len(latencies) if latencies else 0
-
-    return {
-        "request_count": metrics["request_count"],
-        "avg_latency": round(avg_latency, 4),
-    }
+REQUEST_LATENCY = Histogram(
+    'gateway_request_latency_seconds',
+    'Request latency in seconds'
+)
