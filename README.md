@@ -1,4 +1,4 @@
-# Ferrum — Webhook Gateway Service (Phase 4)
+# Ferrum — Webhook Gateway Service (Phase 5)
 
 ## Overview
 
@@ -37,6 +37,7 @@ This service:
 * Serve webhook management APIs
 * Push events to Redis queue
 * Serve cached reads (Redis)
+* Emit structured logs and metrics
 
 ---
 
@@ -46,29 +47,6 @@ This service:
 * Retry failed deliveries
 * Process events asynchronously
 * Guarantee delivery success
-
----
-
-## Project Structure
-
-```text
-webhook-gateway/
-  app/
-    main.py              # API routes + middleware
-    db.py                # DB connection and session
-    models.py            # SQLAlchemy models
-    schemas.py           # Pydantic schemas
-    deps.py              # Dependency injection (DB session)
-    cache.py             # Redis cache + queue producer
-    security.py          # Password hashing
-    crud/
-      user.py
-      webhook.py
-      event.py
-  requirements.txt
-  Dockerfile
-  README.md
-```
 
 ---
 
@@ -86,6 +64,8 @@ webhook-gateway/
   * redis
   * passlib
   * python-dotenv
+  * prometheus-client
+  * python-json-logger
 
 ---
 
@@ -249,7 +229,8 @@ Payload:
 
 ```json
 {
-  "event_id": <id>
+  "event_id": <id>,
+  "request_id": "<uuid>"
 }
 ```
 
@@ -259,29 +240,56 @@ Payload:
 
 ---
 
+### Request Correlation
+
+Each incoming request is assigned a:
+
+```X-Request-ID```
+
+This ID is:
+
+* generated at ingress
+* propagated to queue
+* used by worker for tracing
+
 ### Request Latency Middleware
 
 Every response includes:
 
-```text
-X-Process-Time: <seconds>
-```
+```X-Process-Time: <seconds>```
 
 This measures:
 
 * request lifecycle latency
 * baseline for performance comparisons
 
----
-
 ### Logging
 
-Logs include:
+Structured JSON logs include:
 
-* request completion time
+* request lifecycle
 * cache hits/misses
 * queue push events
 
+Fields:
+```
+service, request_id, event_id, latency, status_code
+```
+
+### Metrics (Prometheus)
+Exposed at:
+```
+GET /metrics
+```
+Metrics include:
+
+* `gateway_requests_total`
+* `gateway_request_latency_seconds`
+
+These enable:
+
+* traffic monitoring
+* latency distribution analysis
 ---
 
 ## Security
@@ -290,7 +298,7 @@ Logs include:
 
 ### Password Hashing
 
-* SHA256 pre-hash + argon2
+* argon2
 * Stored as `password_hash`
 
 ---
@@ -355,6 +363,10 @@ Logs include:
 
 ---
 
+### 6. No distributed tracing
+
+* Only `request_id` based correlation exists
+
 ## Design Decisions
 
 ---
@@ -383,7 +395,7 @@ Logs include:
 
 ---
 
-## Deliberate Gaps (Phase 4+ Work)
+## Deliberate Gaps (Future Work)
 
 * JWT authentication
 * Rate limiting
@@ -391,6 +403,8 @@ Logs include:
 * Message durability guarantees
 * Schema migration automation
 * Horizontal scaling
+* Distributed tracing (OpenTelemetry)
+* Alerting & Dashboards (Grafana)
 
 ---
 
@@ -402,13 +416,17 @@ Logs include:
 * Producer-consumer model
 * Queue-based decoupling
 * Request lifecycle measurement
+* Structured Logging
+* Metrics Instrumentation via Prometheus
+* Cross-service request tracing
 
 ---
 
 ## Status
 
-🚧 Phase 4 — Containerized
-✅ End to End async processing working
+🚧 Phase 5 — Observability
+✅ Logs + Metrics + Correlation implemented
+✅ End-to-end async processing working
 
 ---
 
