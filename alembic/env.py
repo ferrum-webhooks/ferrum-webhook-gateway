@@ -4,12 +4,13 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from dotenv import load_dotenv
 
 from alembic import context
 
 from app.db import Base
 
-
+load_dotenv()
 DB_HOST = os.getenv('DB_HOST', 'localhost')
 DB_PORT = os.getenv('DB_PORT', 5432)
 DB_USER = os.getenv('DB_USER', 'webhook_user')

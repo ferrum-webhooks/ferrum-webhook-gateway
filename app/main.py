@@ -4,6 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 import time
 import logging
+import uuid
 
 from app import schemas
 from app.deps import get_db
@@ -12,18 +13,32 @@ from app.cache import get_cache, set_cache, delete_cache, push_event
 from app.crud import user as crud_user
 from app.crud import webhook as crud_webhook
 from app.crud import event as crud_event
+from app.logging_config import setup_logging
 
-logging.basicConfig(level=logging.INFO)
+setup_logging()
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
+    logger.info(
+        "request completed",
+        extra={"service": "gateway",
+               "request_id": request_id,
+               "method": request.method,
+               "path": request.url.path,
+               "status_code": response.status_code,
+               "latency": round(process_time,4),
+            }
+    )
     response.headers["X-Process-Time"] = str(process_time)
-    logging.info(f"{request.method} {request.url.path} completed in {process_time:.4f}s")
+    response.headers["X-Request-ID"] = request_id
     return response
 
 @app.get("/")
@@ -53,9 +68,11 @@ def list_webhooks(db: Session = Depends(get_db)):
     cache_key = "webhooks:user:1"  # TEMP: we don’t have auth yet
     cached_webhooks = get_cache(cache_key)
     if cached_webhooks:
-        logging.info("CACHE HIT")
+        logger.info(
+            "webhooks_cache_hit",
+            extra={"service": "gateway"}
+        )
         return cached_webhooks
-    logging.info("CACHE MISS")
 
     webhooks = crud_webhook.get_webhooks(db)
     serialized = [
@@ -68,13 +85,22 @@ def list_webhooks(db: Session = Depends(get_db)):
 
 @app.post("/events")
 def create_event(
+    request: Request,
     event: schemas.EventCreate,
     db: Session = Depends(get_db)
 ):
+    request_id = request.state.request_id
     db_event = crud_event.create_event(db, user_id=1, payload=event.payload, event_type=event.event_type)
 
     push_event("event_queue", {
         "event_id": db_event.id,
+        "event_type": db_event.event_type,
+        "request_id": request_id
     })
+
+    logger.info(
+        "event_created",
+        extra={"service": "gateway", "request_id": request_id, "event_id": db_event.id}
+    )
 
     return {"event_id": db_event.id}

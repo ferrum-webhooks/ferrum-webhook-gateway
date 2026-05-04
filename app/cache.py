@@ -18,31 +18,58 @@ def get_cache(key : str):
     try:
         value = redis_client.get(key)
         if value:
-            logger.info(f"CACHE HIT: {key}")
+            logger.info(
+                "cache_hit",
+                extra={"service": "gateway", "cache_key": key}
+            )
             return json.loads(value)
-        logger.info(f"CACHE MISS: {key}")
+        logger.info(
+            "cache_miss",
+            extra={"service": "gateway", "cache_key": key}
+        )
         return None
     except redis.exceptions.RedisError as e:
-        logger.warning(f"CACHE ERROR (GET) {key}: {e}")
+        logger.warning(
+            "get_cache_error",
+            extra={"service": "gateway", "cache_key": key, "error": str(e)}
+        )
         return None
     
 def set_cache(key : str, value, ttl: int = 60):
     try:
         redis_client.setex(key, ttl, json.dumps(value))
-        logger.info(f"CACHE SET: {key} (TTL: {ttl}s)")
+        logger.info(
+            "cache_set",
+            extra={"service": "gateway", "cache_key": key, "ttl": ttl}
+        )
     except redis.exceptions.RedisError as e:
-        logger.warning(f"CACHE ERROR (SET) {key}: {e}")
+        logger.warning(
+            "set_cache_error",
+            extra={"service": "gateway", "cache_key": key, "error": str(e)}
+        )
 
 def delete_cache(key : str):
     try:
         redis_client.delete(key)
-        logger.info(f"CACHE DELETE: {key}")
+        logger.info(
+            "cache_delete",
+            extra={"service": "gateway", "cache_key": key}
+        )
     except redis.exceptions.RedisError as e:
-        logger.warning(f"CACHE ERROR (DELETE) {key}: {e}")
+        logger.warning(
+            "delete_cache_error",
+            extra={"service": "gateway", "cache_key": key, "error": str(e)}
+        )
 
 def push_event(queue_name : str, data : dict):
     try:
         redis_client.lpush(queue_name, json.dumps(data))
-        logger.info(f"EVENT PUSHED: {queue_name} - {data}")
+        logger.info(
+            "event_pushed",
+            extra={"service": "gateway", "queue_name": queue_name, "event_id": data.get("event_id")}
+        )
     except redis.exceptions.RedisError as e:
-        logger.warning(f"CACHE ERROR (PUSH) {queue_name}: {e}")
+        logger.warning(
+            "push_event_error",
+            extra={"service": "gateway", "queue_name": queue_name, "error": str(e)}
+        )

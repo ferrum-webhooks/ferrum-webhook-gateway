@@ -22,6 +22,7 @@ pycparser==2.23
 pydantic==2.13.3
 pydantic_core==2.46.3
 python-dotenv==1.2.1
+python-json-logger==4.0.0
 redis==7.0.1
 SQLAlchemy==2.0.49
 starlette==0.49.3
