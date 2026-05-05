@@ -317,7 +317,7 @@ On every push to `main`:
 
 Images are published as:
 ```
-ghcr.io/<your-username>/gateway:<tag>
+ghcr.io/ferrum-webhooks/gateway:<tag>
 ```
 
 
