@@ -56,5 +56,4 @@ def get_engine():
 
 def get_session_local():
     engine = get_engine()
-    print(engine)
     return sessionmaker(autocommit=False, autoflush=False, bind=engine)
