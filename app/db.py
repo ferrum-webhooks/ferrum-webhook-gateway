@@ -22,6 +22,10 @@ if not DATABASE_URL:
 MAX_RETRIES = 10
 RETRY_DELAY = 2  # seconds
 
+Base = declarative_base()
+
+_engine = None
+
 def create_db_engine():
     for attempt in range(1, MAX_RETRIES + 1):
         try:
@@ -40,6 +44,16 @@ def create_db_engine():
                 raise RuntimeError("Could not connect to the database after multiple attempts")
             time.sleep(RETRY_DELAY)
 
-engine = create_db_engine()
-SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
-Base = declarative_base()
+def get_engine():
+    global _engine
+    if _engine is not None:
+        return _engine
+    if os.getenv('TESTING') == 'true':
+        _engine = create_engine("sqlite:///:memory:")
+        return _engine
+    _engine = create_db_engine()
+    return _engine
+
+def get_session_local():
+    engine = get_engine()
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
