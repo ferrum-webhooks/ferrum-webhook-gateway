@@ -1,4 +1,4 @@
-# Ferrum — Webhook Gateway Service (Phase 5)
+# Ferrum — Webhook Gateway Service (Phase 6)
 
 ## Overview
 
@@ -66,6 +66,7 @@ This service:
   * python-dotenv
   * prometheus-client
   * python-json-logger
+  * pytest
 
 ---
 
@@ -292,6 +293,57 @@ These enable:
 * latency distribution analysis
 ---
 
+## CI/CD (GitHub Actions)
+
+---
+
+This service uses **GitHub Actions** for automated build and artifact generation.
+
+### Pipeline Steps
+
+On every push to `main`:
+
+1. Install dependencies
+2. Run tests (`pytest`)
+3. Build Docker image
+4. Tag image with:
+   - commit SHA (immutable)
+   - `latest` (moving tag)
+5. Push image to GitHub Container Registry (GHCR)
+
+---
+
+### Image Naming
+
+Images are published as:
+```
+ghcr.io/<your-username>/gateway:<tag>
+```
+
+
+Tags:
+
+* `<commit-sha>` → immutable
+* `latest` → used by infrastructure
+
+---
+
+### Key Outcome
+
+The gateway can now be run **without local builds**:
+
+```bash
+docker-compose pull
+docker-compose up
+```
+---
+
+### Current Gaps
+* No deployment automation (manual `docker-compose pull`)
+* No rollback strategy
+* No integration tests
+* No caching in CI
+
 ## Security
 
 ---
@@ -399,7 +451,6 @@ These enable:
 
 * JWT authentication
 * Rate limiting
-* Async DB driver
 * Message durability guarantees
 * Schema migration automation
 * Horizontal scaling
@@ -419,14 +470,15 @@ These enable:
 * Structured Logging
 * Metrics Instrumentation via Prometheus
 * Cross-service request tracing
+* CI with Github Actions
 
 ---
 
 ## Status
 
-🚧 Phase 5 — Observability
-✅ Logs + Metrics + Correlation implemented
-✅ End-to-end async processing working
+🚧 Phase 6 — CI/CD Enabled  
+✅ Automated build + test pipeline  
+✅ Docker images pushed to GHCR  
 
 ---
 
