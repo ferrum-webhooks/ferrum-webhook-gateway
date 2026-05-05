@@ -47,15 +47,15 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Tag image
-      run: docker tag ferrum-gateway:${{ github.sha }} ghcr.io/${{ github.repository }}/gateway:${{ github.sha }}
+      run: docker tag ferrum-gateway:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/gateway:${{ github.sha }}
     
     - name: Push image
-      run: docker push ghcr.io/${{ github.repository }}/gateway:${{ github.sha }}
+      run: docker push ghcr.io/${{ github.repository_owner }}/gateway:${{ github.sha }}
 
     - name: Tag latest
       if: github.ref == 'refs/heads/main'
-      run: docker tag ferrum-gateway:${{ github.sha }} ghcr.io/${{ github.repository }}/gateway:latest
+      run: docker tag ferrum-gateway:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/gateway:latest
 
     - name: Push latest
       if: github.ref == 'refs/heads/main'
-      run: docker push ghcr.io/${{ github.repository }}/gateway:latest
+      run: docker push ghcr.io/${{ github.repository_owner }}/gateway:latest
