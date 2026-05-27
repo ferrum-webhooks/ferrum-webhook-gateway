@@ -4,6 +4,7 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import Response
 from prometheus_client import generate_latest
 from sqlalchemy.orm import Session
+from contextlib import asynccontextmanager
 import time
 import logging
 import uuid
@@ -21,7 +22,13 @@ from app.metrics import REQUEST_COUNT, REQUEST_LATENCY
 setup_logging()
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app):
+    logger.info("gateway_startup")
+    yield
+    logger.warning("gateway_shutdown")
+
+app = FastAPI(lifespan=lifespan)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
