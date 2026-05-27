@@ -9,3 +9,13 @@ REQUEST_LATENCY = Histogram(
     'gateway_request_latency_seconds',
     'Request latency in seconds'
 )
+
+RETRY_ATTEMPTS = Counter(
+    "worker_retry_attempts_total",
+    "Total retry attempts"
+)
+
+DLQ_EVENTS = Counter(
+    "worker_dlq_events_total",
+    "Events moved to dead letter queue"
+)

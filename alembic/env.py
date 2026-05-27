@@ -10,6 +10,8 @@ from alembic import context
 
 from app.db import Base
 
+from app.models import User, Webhook, Event, Delivery
+
 load_dotenv()
 DB_HOST = os.getenv('DB_HOST', 'localhost')
 DB_PORT = os.getenv('DB_PORT', 5432)

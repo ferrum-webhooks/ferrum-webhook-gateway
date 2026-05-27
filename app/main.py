@@ -105,7 +105,8 @@ def create_event(
     push_event("event_queue", {
         "event_id": db_event.id,
         "event_type": db_event.event_type,
-        "request_id": request_id
+        "request_id": request_id,
+        "retry_count": 0
     })
 
     logger.info(
