@@ -11,7 +11,9 @@ REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 REDIS_PORT = int(os.getenv('REDIS_PORT', 6379))
 redis_client = redis.Redis(host=REDIS_HOST, 
                            port=REDIS_PORT, 
-                           db=0, 
+                           db=0,
+                           socket_timeout=1,
+                           socket_connect_timeout=1,
                            decode_responses=True)
 
 def get_cache(key : str):
@@ -60,23 +62,3 @@ def delete_cache(key : str):
             "delete_cache_error",
             extra={"service": "gateway", "cache_key": key, "error": str(e)}
         )
-
-def push_event(queue_name : str, data : dict):
-    try:
-        redis_client.lpush(queue_name, json.dumps(data))
-        logger.info(
-            "event_pushed",
-            extra={"service": "gateway", "queue_name": queue_name, "event_id": data.get("event_id")}
-        )
-    except redis.exceptions.RedisError as e:
-        logger.warning(
-            "push_event_error",
-            extra={"service": "gateway", "queue_name": queue_name, "error": str(e)}
-        )
-
-def get_queue_length(queue_name : str):
-    try:
-        length = redis_client.llen(queue_name)
-        return length
-    except Exception:
-        return -1;

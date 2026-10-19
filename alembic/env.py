@@ -10,7 +10,7 @@ from alembic import context
 
 from app.db import Base
 
-from app.models import User, Webhook, Event, Delivery
+from app import models  # noqa: F401  (registers all tables on Base.metadata)
 
 load_dotenv()
 DB_HOST = os.getenv('DB_HOST', 'localhost')
