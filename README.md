@@ -1,7 +1,7 @@
 # ferrum-webhook-gateway
 
 The API of **Ferrum**, a service that delivers webhooks reliably. This is the part people send events to. It checks who they are, saves each event safely, and shows what happened to it.
-The part that actually delivers the events is [`ferrum-webhook-worker`](https://github.com/pratishtha-abrol/ferrum-webhook-worker).
+The part that actually delivers the events is [`ferrum-webhook-worker`](https://github.com/ferrum-webhooks/ferrum-webhook-worker).
 
 ```mermaid
 sequenceDiagram
@@ -25,7 +25,7 @@ sequenceDiagram
 | Health and metrics | `GET /healthz`, `GET /readyz`, `GET /metrics` |
 
 Sending the same request twice counts once (`Idempotency-Key`). Everyone sees only their own data. Private network addresses are refused as webhook URLs. When overloaded, it answers `503` with a retry hint instead of hanging.
-Full reference: [API docs](https://github.com/pratishtha-abrol/ferrum/blob/main/docs/api.md).
+Full reference: [API docs](https://github.com/ferrum-webhooks/docs/blob/main/api.md).
 
 ## Run it
 
@@ -35,7 +35,7 @@ cp .env.example .env            # fill in JWT_SECRET (32+ characters) and the da
 .venv/bin/python -m alembic upgrade head
 .venv/bin/python -m uvicorn app.main:app --port 8000
 ```
-The easiest full setup (database, Redis, API and worker in one command) is `infra/local/stack.sh up` in the [`infra`](https://github.com/pratishtha-abrol/infra) repository.
+The easiest full setup (database, Redis, API and worker in one command) is `infra/local/stack.sh up` in the [`infra`](https://github.com/ferrum-webhooks/infra) repository.
 
 ## Tests
 
@@ -52,6 +52,6 @@ app/security.py     logins and passwords               app/ssrf.py       the pri
 app/ratelimit.py    request limits                     app/db.py         database connection
 alembic/            database setup (this service owns the schema)
 ```
-Settings: `.env.example`, and [all options](https://github.com/pratishtha-abrol/ferrum/blob/main/docs/configuration.md). If you change `app/models.py`, copy it into the worker repository too.
+Settings: `.env.example`, and [all options](https://github.com/ferrum-webhooks/docs/blob/main/configuration.md). If you change `app/models.py`, copy it into the worker repository too.
 
 MIT licensed.
